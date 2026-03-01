@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Gamepad2, Search, User as UserIcon, LogOut } from 'lucide-react';
+import { Search, User as UserIcon, LogOut } from 'lucide-react';
+import logo from '../assets/LOGO.png';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -25,7 +26,7 @@ const Navbar = () => {
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <Link to="/" className="nav-brand">
-                <Gamepad2 color="#ff6a00" size={32} />
+                <img src={logo} alt="AEVA" className="nav-logo" />
                 <h1>AEVA</h1>
             </Link>
 
