@@ -63,7 +63,6 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Mobile Bottom Navigation */}
             <div className="mobile-nav">
                 <Link to="/" className={`mobile-nav-item ${location.pathname === '/' ? 'active' : ''}`}>
                     <HomeIcon size={24} />
@@ -73,15 +72,10 @@ const Navbar = () => {
                     <Search size={24} />
                     <span>Search</span>
                 </Link>
-                {user ? (
+                {user && (
                     <Link to="/tracked" className={`mobile-nav-item ${location.pathname === '/tracked' ? 'active' : ''}`}>
                         <Heart size={24} />
                         <span>My Games</span>
-                    </Link>
-                ) : (
-                    <Link to="/login" className={`mobile-nav-item ${location.pathname === '/login' ? 'active' : ''}`}>
-                        <UserIcon size={24} />
-                        <span>Login</span>
                     </Link>
                 )}
             </div>
