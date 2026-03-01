@@ -14,6 +14,7 @@ const Tracked = () => {
     const [activeTab, setActiveTab] = useState('alerts');
     const [likedGames, setLikedGames] = useState([]);
     const [priceAlerts, setPriceAlerts] = useState([]);
+    const [livePrices, setLivePrices] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,6 +25,30 @@ const Tracked = () => {
                 const { data } = await axios.get(`${USER_API}/tracked`, { headers });
                 setLikedGames(data.likedGames);
                 setPriceAlerts(data.priceAlerts);
+
+                // Fetch live prices for alerts to check if they are triggered
+                if (data.priceAlerts && data.priceAlerts.length > 0) {
+                    const pricePromises = data.priceAlerts.map(async (alert) => {
+                        try {
+                            // Using standard cheapshark API for quick lookup or our own cache
+                            const res = await axios.get(`http://localhost:5000/api/games/${alert.gameID}`);
+                            if (res.data && res.data.deals && res.data.deals.length > 0) {
+                                return { gameID: alert.gameID, price: parseFloat(res.data.deals[0].price) };
+                            }
+                        } catch (e) {
+                            console.error(`Failed to fetch live price for ${alert.gameID}`, e);
+                        }
+                        return { gameID: alert.gameID, price: null };
+                    });
+
+                    const results = await Promise.all(pricePromises);
+                    const priceMap = {};
+                    results.forEach(r => {
+                        if (r.price !== null) priceMap[r.gameID] = r.price;
+                    });
+                    setLivePrices(priceMap);
+                }
+
             } catch (err) {
                 console.error('Error fetching tracked data:', err);
             } finally {
@@ -99,8 +124,12 @@ const Tracked = () => {
                                     const img = alert.steamAppID
                                         ? `https://cdn.akamai.steamstatic.com/steam/apps/${alert.steamAppID}/header.jpg`
                                         : alert.thumb;
+
+                                    const currentPrice = livePrices[alert.gameID];
+                                    const isTriggered = currentPrice !== undefined && currentPrice <= alert.targetPrice;
+
                                     return (
-                                        <div key={alert.gameID} className="tracked-card glass">
+                                        <div key={alert.gameID} className={`tracked-card glass ${isTriggered ? 'alert-triggered' : ''}`}>
                                             <Link to={`/info/${alert.gameID}`} className="tracked-card-img">
                                                 <img src={img} alt={alert.title} />
                                             </Link>
@@ -108,6 +137,11 @@ const Tracked = () => {
                                                 <Link to={`/info/${alert.gameID}`} className="tracked-card-title">{alert.title}</Link>
                                                 <div className="tracked-card-meta">
                                                     <span className="tracked-target">Target: <strong>{formatPrice(alert.targetPrice)}</strong></span>
+                                                    {currentPrice !== undefined && (
+                                                        <span className="tracked-current" style={{ marginLeft: '10px', color: isTriggered ? '#ff6a00' : 'inherit' }}>
+                                                            Current: <strong>{formatPrice(currentPrice)}</strong>
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <button className="tracked-remove" onClick={() => handleRemoveAlert(alert.gameID)} title="Remove alert">

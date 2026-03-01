@@ -158,3 +158,15 @@
 .tracked-empty-tab h3 {
     color: var(--text-main);
 }
+
+/* Alert Triggered Highlight */
+.tracked-card.alert-triggered {
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+    background: rgba(255, 106, 0, 0.05);
+}
+
+.tracked-card.alert-triggered:hover {
+    box-shadow: 0 0 25px rgba(255, 106, 0, 0.5);
+    background: rgba(255, 106, 0, 0.1);
+}
