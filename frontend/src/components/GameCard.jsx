@@ -31,7 +31,7 @@ const GameCard = ({ game, rank }) => {
                         </div>
 
                         <div className="game-actions">
-                            <Link to={`/ info / ${game.gameID || game.id} `} className="btn btn-primary">
+                            <Link to={`/info/${game.gameID || game.id}`} className="btn btn-primary">
                                 <Info size={16} /> Details
                             </Link>
                             {game.dealID && (
