@@ -1,7 +1,9 @@
 .game-card {
     position: relative;
-    min-width: 250px;
-    height: 350px;
+    width: 230px;
+    min-width: 230px;
+    max-width: 230px;
+    height: 340px;
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;

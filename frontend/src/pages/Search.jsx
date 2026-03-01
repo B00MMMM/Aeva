@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Search.css';
-import { Search as SearchIcon, Loader, Star, ChevronRight } from 'lucide-react';
+import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/games';
 
@@ -11,6 +11,7 @@ const Search = () => {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+    const scrollRef = useRef(null);
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -25,6 +26,15 @@ const Search = () => {
             console.error('Error searching games:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({
+                left: direction === 'left' ? -400 : 400,
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -69,46 +79,64 @@ const Search = () => {
 
                 {!loading && topResult && (
                     <>
-                        <h2 className="results-count">{results.length} game{results.length !== 1 ? 's' : ''} found for "{query}"</h2>
+                        <h2 className="results-count">{results.length} game{results.length !== 1 ? 's' : ''} found</h2>
 
-                        {/* Top Match — Full-Width Hero Card */}
-                        <Link to={`/info/${topResult.gameID}`} className="top-match">
-                            <div className="top-match-info">
-                                <span className="top-match-label">Best Match</span>
-                                <h2 className="top-match-title">{topResult.external}</h2>
-                                <div className="top-match-meta">
-                                    <span className="top-match-price">From ${topResult.cheapest}</span>
+                        {/* Top Match — Full-width hero banner */}
+                        <Link
+                            to={`/info/${topResult.gameID}`}
+                            className="top-match"
+                            style={{ backgroundImage: `url(${topResult.steamImages?.header || topResult.thumb})` }}
+                        >
+                            <div className="top-match-overlay">
+                                <div className="top-match-info">
+                                    <span className="top-match-label">Best Match</span>
+                                    <h2 className="top-match-title">{topResult.external}</h2>
+                                    <div className="top-match-meta">
+                                        <span className="top-match-price">From ${topResult.cheapest}</span>
+                                    </div>
+                                    <span className="top-match-cta">
+                                        View Details <ChevronRight size={18} />
+                                    </span>
                                 </div>
-                                <span className="top-match-cta">
-                                    View Details <ChevronRight size={18} />
-                                </span>
-                            </div>
-                            <div className="top-match-cover">
-                                <img
-                                    src={topResult.steamImages?.header || topResult.thumb || 'https://via.placeholder.com/460x215'}
-                                    alt={topResult.external}
-                                />
                             </div>
                         </Link>
 
-                        {/* Other Results — Vertical Scroll List */}
+                        {/* Other Results — Horizontal scroll cards like trending */}
                         {otherResults.length > 0 && (
-                            <div className="other-results">
-                                <h3 className="other-results-heading">More Results</h3>
-                                <div className="other-results-scroll">
-                                    {otherResults.map((game) => {
-                                        const image = game.steamImages?.header || game.thumb || 'https://via.placeholder.com/460x215';
-                                        return (
-                                            <Link to={`/info/${game.gameID}`} key={game.gameID} className="result-row glass">
-                                                <img src={image} alt={game.external} className="result-row-img" />
-                                                <div className="result-row-info">
-                                                    <h4 className="result-row-title">{game.external}</h4>
+                            <div className="search-scroll-section">
+                                <h3 className="section-title">More Results</h3>
+                                <div className="search-scroll-wrapper">
+                                    <button className="scroll-arrow left" onClick={() => scroll('left')}>
+                                        <ChevronLeft size={28} />
+                                    </button>
+                                    <div className="search-scroll-row" ref={scrollRef}>
+                                        {otherResults.map((game) => {
+                                            const capsule = game.steamImages?.capsule || game.steamImages?.header || game.thumb || 'https://via.placeholder.com/300x400';
+                                            return (
+                                                <div key={game.gameID} className="game-card">
+                                                    <div className="game-image-wrapper">
+                                                        <img src={capsule} alt={game.external} loading="lazy" />
+                                                        <div className="game-overlay">
+                                                            <div className="game-overlay-content">
+                                                                <h3 className="game-title">{game.external}</h3>
+                                                                <div className="game-meta">
+                                                                    <span className="price">${game.cheapest}</span>
+                                                                </div>
+                                                                <div className="game-actions">
+                                                                    <Link to={`/info/${game.gameID}`} className="btn btn-primary">
+                                                                        <Info size={16} /> Details
+                                                                    </Link>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <span className="result-row-price">From ${game.cheapest}</span>
-                                                <ChevronRight size={20} className="result-row-arrow" />
-                                            </Link>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
+                                    <button className="scroll-arrow right" onClick={() => scroll('right')}>
+                                        <ChevronRight size={28} />
+                                    </button>
                                 </div>
                             </div>
                         )}
