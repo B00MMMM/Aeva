@@ -31,12 +31,13 @@ const Navbar = () => {
 
             <div className="nav-links">
                 <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link>
-                <Link to="#">API</Link>
-                <Link to="#">Browse ▾</Link>
+                <Link to="/search" className={location.pathname === '/search' ? 'active' : ''}>Search</Link>
             </div>
 
             <div className="nav-actions">
-                <Search size={20} style={{ cursor: 'pointer' }} color="#a0a0a0" />
+                <Link to="/search" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Search size={20} style={{ cursor: 'pointer' }} color="#a0a0a0" />
+                </Link>
                 {user ? (
                     <>
                         <span style={{ color: '#a0a0a0' }}>Welcome, {user.username}</span>
