@@ -80,10 +80,54 @@
     margin-bottom: 30px;
 }
 
-.search-results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 25px;
+/* Unique game result cards */
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-result-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.search-result-card:hover {
+    transform: translateX(5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.search-result-img {
+    width: 184px;
+    height: 69px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.search-result-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.search-result-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #10b981;
+    white-space: nowrap;
 }
 
 .search-loading {
