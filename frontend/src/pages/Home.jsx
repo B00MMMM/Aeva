@@ -6,7 +6,7 @@ import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 
-const API_URL = 'http://localhost:5000/api/games';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/games`;
 
 // Reusable ScrollRow component with side arrows
 const ScrollRow = ({ children }) => {
