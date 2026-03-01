@@ -6,7 +6,7 @@ import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info, X } from
 import { CurrencyContext } from '../context/CurrencyContext';
 import { AuthContext } from '../context/AuthContext';
 
-const API_URL = 'http://localhost:5000/api/games';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/games`;
 
 const Search = () => {
     const { user, getAuthHeader } = useContext(AuthContext) || {}; // fallback for safety
@@ -29,7 +29,7 @@ const Search = () => {
         const fetchSearches = async () => {
             try {
                 const headers = getAuthHeader();
-                const { data } = await axios.get('http://localhost:5000/api/user/searches', { headers });
+                const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/user/searches`, { headers });
                 setRecentSearches(data);
             } catch (err) {
                 console.error('Error fetching recent searches:', err);
@@ -53,7 +53,7 @@ const Search = () => {
         e.stopPropagation(); // prevent triggering the search click
         try {
             const headers = getAuthHeader();
-            await axios.delete('http://localhost:5000/api/user/searches/item', {
+            await axios.delete(`${import.meta.env.VITE_API_URL || ''}/api/user/searches/item`, {
                 data: { term: termToRemove },
                 headers
             });
@@ -75,7 +75,7 @@ const Search = () => {
             // Save search to Redis history (fire and forget)
             if (user) {
                 const headers = getAuthHeader();
-                axios.post('http://localhost:5000/api/user/searches', { term: searchTerm }, { headers }).catch(e => console.error(e));
+                axios.post(`${import.meta.env.VITE_API_URL || ''}/api/user/searches`, { term: searchTerm }, { headers }).catch(e => console.error(e));
 
                 // Optimistically update local state if new
                 if (!recentSearches.includes(searchTerm.toLowerCase())) {

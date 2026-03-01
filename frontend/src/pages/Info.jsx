@@ -8,8 +8,8 @@ import { CurrencyContext } from '../context/CurrencyContext';
 import './Info.css';
 import { ArrowLeft, ExternalLink, Play, Expand, ChevronLeft, ChevronRight, Heart, Bell, ThumbsUp, ThumbsDown } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/games';
-const USER_API = 'http://localhost:5000/api/user';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/games`;
+const USER_API = `${import.meta.env.VITE_API_URL || ''}/api/user`;
 
 const Info = () => {
     const { id } = useParams();

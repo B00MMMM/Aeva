@@ -6,7 +6,7 @@ import { CurrencyContext } from '../context/CurrencyContext';
 import './Tracked.css';
 import { Heart, Bell, Trash2, ExternalLink } from 'lucide-react';
 
-const USER_API = 'http://localhost:5000/api/user';
+const USER_API = `${import.meta.env.VITE_API_URL || ''}/api/user`;
 
 const Tracked = () => {
     const { user, getAuthHeader } = useContext(AuthContext);
@@ -31,7 +31,7 @@ const Tracked = () => {
                     const pricePromises = data.priceAlerts.map(async (alert) => {
                         try {
                             // Using standard cheapshark API for quick lookup or our own cache
-                            const res = await axios.get(`http://localhost:5000/api/games/${alert.gameID}`);
+                            const res = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/games/${alert.gameID}`);
                             if (res.data && res.data.deals && res.data.deals.length > 0) {
                                 return { gameID: alert.gameID, price: parseFloat(res.data.deals[0].price) };
                             }
