@@ -14,7 +14,6 @@ const checkCache = async (req, res, next) => {
             console.log(`Cache hit for ${key}`);
             return res.json(cachedData.data);
         }
-        // Delete expired cache safely
         if (cachedData) {
             await Cache.deleteOne({ key });
         }
@@ -47,8 +46,6 @@ router.get('/trending', checkCache, async (req, res) => {
         const response = await axios.get(`${CHEAPSHARK_API}/deals?storeID=1&lowerPrice=0&sortBy=Deal Rating&onSale=1&pageNumber=0`);
         let deals = response.data.slice(0, 15);
 
-        // Syncing mechanism: Construct Steam CDN image URLs directly from steamAppID
-        // This avoids hitting Steam API per-deal (rate-limited). CDN URLs are deterministic.
         const enrichedDeals = deals.map((deal) => {
             if (deal.steamAppID) {
                 const appId = deal.steamAppID;
@@ -73,7 +70,38 @@ router.get('/trending', checkCache, async (req, res) => {
     }
 });
 
-// Get Deals (Generic Search)
+// Steam Search — returns unique games (no duplicate deals)
+router.get('/search', checkCache, async (req, res) => {
+    try {
+        const term = req.query.term || '';
+        // Use CheapShark's games endpoint which groups by game (no duplicates)
+        const response = await axios.get(`${CHEAPSHARK_API}/games?title=${encodeURIComponent(term)}&limit=20&exact=0`);
+        const games = response.data;
+
+        // Enrich with Steam CDN images
+        const enrichedGames = games.map((game) => {
+            if (game.steamAppID) {
+                const appId = game.steamAppID;
+                return {
+                    ...game,
+                    steamImages: {
+                        header: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`,
+                        capsule: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`,
+                    }
+                };
+            }
+            return game;
+        });
+
+        await saveToCache(req.originalUrl, enrichedGames);
+        res.json(enrichedGames);
+    } catch (error) {
+        console.error('Search Error:', error.message);
+        res.status(500).json({ message: 'Failed to search games' });
+    }
+});
+
+// Get Deals (Generic Search — used internally)
 router.get('/deals', checkCache, async (req, res) => {
     try {
         const title = req.query.title || '';
@@ -89,7 +117,7 @@ router.get('/deals', checkCache, async (req, res) => {
     }
 });
 
-// Get Info for a Specific Game by ID
+// Get Info for a Specific Game by CheapShark ID
 router.get('/:id', checkCache, async (req, res) => {
     try {
         const gameId = req.params.id;

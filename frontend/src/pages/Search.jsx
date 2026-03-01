@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import GameCard from '../components/GameCard';
 import './Search.css';
 import { Search as SearchIcon, Loader } from 'lucide-react';
 
@@ -20,7 +19,7 @@ const Search = () => {
         setLoading(true);
         setSearched(true);
         try {
-            const { data } = await axios.get(`${API_URL}/deals?title=${encodeURIComponent(query.trim())}`);
+            const { data } = await axios.get(`${API_URL}/search?term=${encodeURIComponent(query.trim())}`);
             setResults(data);
         } catch (error) {
             console.error('Error searching games:', error);
@@ -55,7 +54,7 @@ const Search = () => {
                 {loading && (
                     <div className="search-loading">
                         <Loader size={40} className="spin" />
-                        <p>Searching deals...</p>
+                        <p>Searching games...</p>
                     </div>
                 )}
 
@@ -68,11 +67,20 @@ const Search = () => {
 
                 {!loading && results.length > 0 && (
                     <>
-                        <h2 className="results-count">{results.length} deal{results.length !== 1 ? 's' : ''} found for "{query}"</h2>
-                        <div className="search-results-grid">
-                            {results.map((game) => (
-                                <GameCard key={game.dealID} game={game} />
-                            ))}
+                        <h2 className="results-count">{results.length} game{results.length !== 1 ? 's' : ''} found for "{query}"</h2>
+                        <div className="search-results-list">
+                            {results.map((game) => {
+                                const image = game.steamImages?.header || game.thumb || 'https://via.placeholder.com/460x215?text=No+Image';
+                                return (
+                                    <Link to={`/info/${game.gameID}`} key={game.gameID} className="search-result-card glass">
+                                        <img src={image} alt={game.external} className="search-result-img" />
+                                        <div className="search-result-info">
+                                            <h3 className="search-result-title">{game.external}</h3>
+                                            <span className="search-result-price">From ${game.cheapest}</span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </>
                 )}
