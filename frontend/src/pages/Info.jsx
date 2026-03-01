@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import DealCard from '../components/DealCard';
 import './Info.css';
-import { ArrowLeft, ExternalLink, Play, Expand } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Play, Expand, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef } from 'react';
 
 const API_URL = 'http://localhost:5000/api/games';
 
@@ -13,6 +14,7 @@ const Info = () => {
     const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeScreenshot, setActiveScreenshot] = useState(null);
+    const videoScrollRef = useRef(null);
 
     useEffect(() => {
         const fetchGameInfo = async () => {
@@ -33,6 +35,15 @@ const Info = () => {
 
         fetchGameInfo();
     }, [id]);
+
+    const scrollVideos = (direction) => {
+        if (videoScrollRef.current) {
+            videoScrollRef.current.scrollBy({
+                left: direction === 'left' ? -400 : 400,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     if (loading) {
         return <div className="loading-screen">Loading Game Details...</div>;
@@ -64,7 +75,7 @@ const Info = () => {
 
     return (
         <div className="info-page">
-            {/* Hero Section with background */}
+            {/* Hero Section */}
             <div
                 className="info-hero"
                 style={{ backgroundImage: `url(${heroImage})` }}
@@ -100,61 +111,76 @@ const Info = () => {
                 </div>
             </div>
 
-            {/* Trailers / Videos Section */}
+            {/* Deals Section — full-width vertical rows */}
+            <div className="deals-container">
+                <h2 className="section-title">Available Deals</h2>
+                <div className="deals-list">
+                    {deals.map(deal => (
+                        <DealCard key={deal.dealID} deal={deal} stores={stores} layout="row" />
+                    ))}
+                </div>
+            </div>
+
+            {/* Trailers / Videos Section — horizontal scroll */}
             {movies.length > 0 && (
                 <div className="media-section">
                     <h2 className="section-title">Trailers & Videos</h2>
-                    <div className="videos-grid">
-                        {movies.map((movie) => {
-                            // Steam now provides HLS/DASH streams. Try to get a direct MP4 fallback url.
-                            // Build a direct mp4 URL from Steam's CDN pattern
-                            const videoSrc = movie.mp4?.max
-                                || movie.mp4?.['480']
-                                || movie.webm?.max
-                                || movie.webm?.['480']
-                                || null;
-                            const hlsSrc = movie.hls_h264 || null;
+                    <div className="video-scroll-wrapper">
+                        <button className="video-scroll-btn left" onClick={() => scrollVideos('left')}>
+                            <ChevronLeft size={28} />
+                        </button>
+                        <div className="video-scroll-container" ref={videoScrollRef}>
+                            {movies.map((movie) => {
+                                // Steam provides embedded video via store widget
+                                const steamEmbedUrl = steamAppID
+                                    ? `https://store.steampowered.com/widget/${steamAppID}`
+                                    : null;
+                                // Direct MP4 (legacy) or fallback to Steam store
+                                const videoSrc = movie.mp4?.max || movie.mp4?.['480'] || movie.webm?.max || null;
 
-                            return (
-                                <div key={movie.id} className="video-card glass">
-                                    {videoSrc ? (
-                                        <video
-                                            controls
-                                            poster={movie.thumbnail}
-                                            preload="none"
-                                            className="video-player"
-                                        >
-                                            <source src={videoSrc} type="video/mp4" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    ) : (
-                                        <a
-                                            href={`https://store.steampowered.com/app/${steamAppID}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="video-link-card"
-                                        >
-                                            <img src={movie.thumbnail} alt={movie.name} className="video-thumbnail" />
-                                            <div className="video-play-overlay">
-                                                <Play size={50} fill="white" />
-                                                <span>Watch on Steam</span>
-                                            </div>
-                                        </a>
-                                    )}
-                                    <div className="video-info">
-                                        <h4>{movie.name}</h4>
-                                        <a
-                                            href={`https://store.steampowered.com/app/${steamAppID}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="steam-link"
-                                        >
-                                            <ExternalLink size={14} /> View on Steam Store
-                                        </a>
+                                return (
+                                    <div key={movie.id} className="video-card glass">
+                                        {videoSrc ? (
+                                            <video
+                                                controls
+                                                poster={movie.thumbnail}
+                                                preload="none"
+                                                className="video-player"
+                                            >
+                                                <source src={videoSrc} type="video/mp4" />
+                                            </video>
+                                        ) : (
+                                            <a
+                                                href={`https://store.steampowered.com/app/${steamAppID}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="video-link-card"
+                                            >
+                                                <img src={movie.thumbnail} alt={movie.name} className="video-thumbnail" />
+                                                <div className="video-play-overlay">
+                                                    <Play size={50} fill="white" />
+                                                    <span>Watch on Steam</span>
+                                                </div>
+                                            </a>
+                                        )}
+                                        <div className="video-info">
+                                            <h4>{movie.name}</h4>
+                                            <a
+                                                href={`https://store.steampowered.com/app/${steamAppID}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="steam-link"
+                                            >
+                                                <ExternalLink size={14} /> Steam
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
+                        <button className="video-scroll-btn right" onClick={() => scrollVideos('right')}>
+                            <ChevronRight size={28} />
+                        </button>
                     </div>
                 </div>
             )}
@@ -197,16 +223,6 @@ const Info = () => {
                     </div>
                 </div>
             )}
-
-            {/* Deals Section */}
-            <div className="deals-container">
-                <h2 className="section-title">Available Deals</h2>
-                <div className="deals-grid">
-                    {deals.map(deal => (
-                        <DealCard key={deal.dealID} deal={deal} stores={stores} />
-                    ))}
-                </div>
-            </div>
         </div>
     );
 };

@@ -7,9 +7,32 @@
 }
 
 .deal-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Row layout — horizontal full-width */
+.deal-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 25px;
+}
+
+.deal-row .deal-store-info {
+    min-width: 160px;
+}
+
+.deal-row .deal-price-info {
+    flex: 1;
+    justify-content: center;
+}
+
+.deal-row .get-deal-btn {
+    width: auto;
+    margin-top: 0;
+    white-space: nowrap;
 }
 
 .deal-store-info {
@@ -33,6 +56,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .price-tag {

@@ -4,6 +4,7 @@ import GameCard from '../components/GameCard';
 import './Home.css';
 import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 const API_URL = 'http://localhost:5000/api/games';
 
@@ -148,6 +149,8 @@ const Home = () => {
                     ))}
                 </ScrollRow>
             </section>
+
+            <Footer />
         </div>
     );
 };
