@@ -3,8 +3,13 @@ import { Play, Info } from 'lucide-react';
 import './GameCard.css';
 
 const GameCard = ({ game, rank }) => {
-    // Use high-res image if available, fallback to thumb
-    const imageSrc = game.thumb || 'https://via.placeholder.com/300x400?text=No+Image';
+    // Priority: Steam CDN capsule > Steam CDN header > steamInfo capsule > CheapShark thumb
+    const imageSrc = game.steamImages?.capsule
+        || game.steamImages?.header
+        || game.steamInfo?.capsule_image
+        || game.steamInfo?.header_image
+        || game.thumb
+        || 'https://via.placeholder.com/300x400?text=No+Image';
     const savings = game.savings ? Math.round(game.savings) : 0;
 
     return (

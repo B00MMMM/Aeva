@@ -34,7 +34,7 @@ const saveToCache = async (key, data, ttlHours = 2) => {
         await Cache.findOneAndUpdate(
             { key },
             { key, data, expiresAt },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
     } catch (err) {
         console.error('Error saving to cache:', err);
@@ -44,12 +44,29 @@ const saveToCache = async (key, data, ttlHours = 2) => {
 // Get Trending Deals (Using Top Deals)
 router.get('/trending', checkCache, async (req, res) => {
     try {
-        // Fetch deals sorted by Deal Rating, Metacritic, or Savings
         const response = await axios.get(`${CHEAPSHARK_API}/deals?storeID=1&lowerPrice=0&sortBy=Deal Rating&onSale=1&pageNumber=0`);
-        const deals = response.data.slice(0, 15); // Top 15 deals
+        let deals = response.data.slice(0, 15);
 
-        await saveToCache(req.originalUrl, deals);
-        res.json(deals);
+        // Syncing mechanism: Construct Steam CDN image URLs directly from steamAppID
+        // This avoids hitting Steam API per-deal (rate-limited). CDN URLs are deterministic.
+        const enrichedDeals = deals.map((deal) => {
+            if (deal.steamAppID) {
+                const appId = deal.steamAppID;
+                return {
+                    ...deal,
+                    steamImages: {
+                        header: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`,
+                        capsule: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`,
+                        hero: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg`,
+                        background: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/page_bg_generated_v6b.jpg`,
+                    }
+                };
+            }
+            return deal;
+        });
+
+        await saveToCache(req.originalUrl, enrichedDeals);
+        res.json(enrichedDeals);
     } catch (error) {
         console.error('CheapShark API Error:', error.message);
         res.status(500).json({ message: 'Failed to fetch trending games' });
@@ -78,8 +95,23 @@ router.get('/:id', checkCache, async (req, res) => {
         const gameId = req.params.id;
         const response = await axios.get(`${CHEAPSHARK_API}/games?id=${gameId}`);
 
-        await saveToCache(req.originalUrl, response.data);
-        res.json(response.data);
+        let gameData = response.data;
+
+        // Fetch extra metadata from Steam if steamAppID exists
+        if (gameData.info && gameData.info.steamAppID) {
+            try {
+                const steamResponse = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${gameData.info.steamAppID}`);
+                const steamData = steamResponse.data[gameData.info.steamAppID];
+                if (steamData && steamData.success) {
+                    gameData.steamInfo = steamData.data;
+                }
+            } catch (steamError) {
+                console.error('Steam API Error:', steamError.message);
+            }
+        }
+
+        await saveToCache(req.originalUrl, gameData);
+        res.json(gameData);
     } catch (error) {
         console.error('CheapShark API Error:', error.message);
         res.status(500).json({ message: 'Failed to fetch game details' });
@@ -90,7 +122,7 @@ router.get('/:id', checkCache, async (req, res) => {
 router.get('/stores/list', checkCache, async (req, res) => {
     try {
         const response = await axios.get(`${CHEAPSHARK_API}/stores`);
-        await saveToCache(req.originalUrl, response.data, 24); // Cache stores for 24 hours
+        await saveToCache(req.originalUrl, response.data, 24);
         res.json(response.data);
     } catch (error) {
         console.error('CheapShark API Error:', error.message);
