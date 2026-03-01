@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import DealCard from '../components/DealCard';
 import './Info.css';
-import { ArrowLeft, ExternalLink, Play } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Play, Expand } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/games';
 
@@ -49,15 +49,26 @@ const Info = () => {
 
     const { info, deals, steamInfo } = gameData;
     const cheapestDeal = deals[0];
-    const heroImage = steamInfo?.background || steamInfo?.header_image || info.thumb || 'https://via.placeholder.com/1920x1080';
+
+    // Build hero image: prefer a full-res screenshot for a cinematic look
+    const steamAppID = info.steamAppID;
+    const firstScreenshot = steamInfo?.screenshots?.[0]?.path_full;
+    const heroImage = firstScreenshot
+        || steamInfo?.header_image
+        || (steamAppID ? `https://cdn.akamai.steamstatic.com/steam/apps/${steamAppID}/header.jpg` : null)
+        || steamInfo?.background
+        || info.thumb;
 
     const screenshots = steamInfo?.screenshots || [];
     const movies = steamInfo?.movies || [];
 
     return (
         <div className="info-page">
-            {/* Hero Section */}
-            <div className="info-hero" style={{ backgroundImage: `url(${heroImage})` }}>
+            {/* Hero Section with background */}
+            <div
+                className="info-hero"
+                style={{ backgroundImage: `url(${heroImage})` }}
+            >
                 <div className="info-overlay">
                     <Link to="/" className="back-link">
                         <ArrowLeft size={20} /> Back to Games
@@ -66,17 +77,19 @@ const Info = () => {
                         <h1 className="info-title">{info.title}</h1>
                         {steamInfo && (
                             <div className="steam-metadata">
-                                {steamInfo.genres && (
-                                    <div className="steam-genres">
-                                        {steamInfo.genres.map(g => <span key={g.id} className="genre-badge">{g.description}</span>)}
-                                    </div>
-                                )}
-                                {steamInfo.release_date && (
-                                    <span className="release-date">📅 {steamInfo.release_date.date}</span>
-                                )}
-                                {steamInfo.metacritic && (
-                                    <span className="metacritic-badge">Metacritic: {steamInfo.metacritic.score}</span>
-                                )}
+                                <div className="steam-badges-row">
+                                    {steamInfo.genres && (
+                                        <div className="steam-genres">
+                                            {steamInfo.genres.map(g => <span key={g.id} className="genre-badge">{g.description}</span>)}
+                                        </div>
+                                    )}
+                                    {steamInfo.release_date && (
+                                        <span className="release-date">📅 {steamInfo.release_date.date}</span>
+                                    )}
+                                    {steamInfo.metacritic && (
+                                        <span className="metacritic-badge">Metacritic: {steamInfo.metacritic.score}</span>
+                                    )}
+                                </div>
                                 <p className="steam-description">{steamInfo.short_description}</p>
                             </div>
                         )}
@@ -92,23 +105,56 @@ const Info = () => {
                 <div className="media-section">
                     <h2 className="section-title">Trailers & Videos</h2>
                     <div className="videos-grid">
-                        {movies.map((movie) => (
-                            <div key={movie.id} className="video-card glass">
-                                <video
-                                    controls
-                                    poster={movie.thumbnail}
-                                    preload="none"
-                                    className="video-player"
-                                >
-                                    <source src={movie.mp4?.max || movie.mp4?.['480']} type="video/mp4" />
-                                    <source src={movie.webm?.max || movie.webm?.['480']} type="video/webm" />
-                                    Your browser does not support the video tag.
-                                </video>
-                                <div className="video-info">
-                                    <h4>{movie.name}</h4>
+                        {movies.map((movie) => {
+                            // Steam now provides HLS/DASH streams. Try to get a direct MP4 fallback url.
+                            // Build a direct mp4 URL from Steam's CDN pattern
+                            const videoSrc = movie.mp4?.max
+                                || movie.mp4?.['480']
+                                || movie.webm?.max
+                                || movie.webm?.['480']
+                                || null;
+                            const hlsSrc = movie.hls_h264 || null;
+
+                            return (
+                                <div key={movie.id} className="video-card glass">
+                                    {videoSrc ? (
+                                        <video
+                                            controls
+                                            poster={movie.thumbnail}
+                                            preload="none"
+                                            className="video-player"
+                                        >
+                                            <source src={videoSrc} type="video/mp4" />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    ) : (
+                                        <a
+                                            href={`https://store.steampowered.com/app/${steamAppID}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="video-link-card"
+                                        >
+                                            <img src={movie.thumbnail} alt={movie.name} className="video-thumbnail" />
+                                            <div className="video-play-overlay">
+                                                <Play size={50} fill="white" />
+                                                <span>Watch on Steam</span>
+                                            </div>
+                                        </a>
+                                    )}
+                                    <div className="video-info">
+                                        <h4>{movie.name}</h4>
+                                        <a
+                                            href={`https://store.steampowered.com/app/${steamAppID}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="steam-link"
+                                        >
+                                            <ExternalLink size={14} /> View on Steam Store
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -131,7 +177,7 @@ const Info = () => {
                             >
                                 <img src={ss.path_thumbnail} alt={`Screenshot ${idx + 1}`} loading="lazy" />
                                 <div className="screenshot-overlay">
-                                    <Play size={30} />
+                                    <Expand size={30} />
                                 </div>
                             </div>
                         ))}
