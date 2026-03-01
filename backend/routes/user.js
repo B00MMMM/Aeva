@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const redisClient = require('../config/redis');
 
 const router = express.Router();
 
@@ -95,6 +96,68 @@ router.get('/tracked', auth, async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// --- Search History using Redis ---
+
+// Save a search term to user's history
+router.post('/searches', auth, async (req, res) => {
+    const { term } = req.body;
+    if (!term) return res.status(400).json({ message: 'Search term is required' });
+
+    try {
+        const userId = req.user.id;
+        const redisKey = `user_searches:${userId}`;
+
+        // ZADD adds the term with the current timestamp as the score, handling duplicates
+        await redisClient.zadd(redisKey, {
+            score: Date.now(),
+            member: term.trim().toLowerCase()
+        });
+
+        // ZREMRANGEBYRANK keeps only the top 10 most recent searches (-11 to negative infinity)
+        // 0 is lowest score (oldest), -1 is highest score (newest)
+        const totalElements = await redisClient.zcard(redisKey);
+        if (totalElements > 10) {
+            await redisClient.zremrangebyrank(redisKey, 0, totalElements - 11);
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error saving search to Redis:', err);
+        res.status(500).json({ message: 'Server error saving search' });
+    }
+});
+
+// Get recent search history
+router.get('/searches', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const redisKey = `user_searches:${userId}`;
+
+        // Get all members, sorted by score descending (newest first)
+        // Upstash SDK recommends using zrange with { rev: true } instead of deprecated zrevrange
+        const recentSearches = await redisClient.zrange(redisKey, 0, 9, { rev: true });
+
+        res.json(recentSearches || []);
+    } catch (err) {
+        console.error('Error fetching searches from Redis:', err);
+        res.status(500).json({ message: 'Server error fetching searches' });
+    }
+});
+
+// Clear all search history
+router.delete('/searches', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const redisKey = `user_searches:${userId}`;
+
+        await redisClient.del(redisKey);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error clearing searches from Redis:', err);
+        res.status(500).json({ message: 'Server error clearing searches' });
     }
 });
 
