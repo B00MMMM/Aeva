@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Gamepad2, Github, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import logo from '../assets/LOGO.png';
 import './Footer.css';
 
 const Footer = () => {
@@ -8,7 +9,7 @@ const Footer = () => {
             <div className="footer-content">
                 <div className="footer-brand">
                     <div className="footer-logo">
-                        <Gamepad2 color="#ff6a00" size={28} />
+                        <img src={logo} alt="AEVA" className="footer-logo-img" />
                         <h3>AEVA</h3>
                     </div>
                     <p className="footer-tagline">Your ultimate game price comparison platform. Find the best deals across multiple stores.</p>
