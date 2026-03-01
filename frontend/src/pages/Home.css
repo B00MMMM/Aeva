@@ -231,3 +231,78 @@
 .scroll-arrow.right:hover {
     background: linear-gradient(to left, rgba(11, 12, 16, 1), transparent);
 }
+
+/* ===== MEDIA QUERIES FOR RESPONSIVENESS ===== */
+
+@media (max-width: 900px) {
+    .hero-content {
+        margin-left: 10px;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .content-section .section-title span {
+        font-size: 2rem;
+    }
+
+    .section-header .section-title span {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .hero-overlay {
+        padding: 0 10px;
+    }
+
+    .hero-nav-btn {
+        padding: 10px 5px;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .btn-large {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    .hero-badges {
+        margin-bottom: 10px;
+    }
+
+    /* Content Row Adjustments */
+    .content-section {
+        padding: 30px 10px;
+    }
+
+    .content-section .section-title {
+        font-size: 1.5rem;
+    }
+
+    .content-section .section-title span {
+        font-size: 1.8rem;
+    }
+
+    .section-header form.section-title span {
+        display: none;
+        /* hide pipe */
+    }
+}

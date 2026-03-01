@@ -261,3 +261,54 @@ a:hover {
   margin-top: 20px;
   color: var(--text-muted);
 }
+
+/* ===== MOBILE BOTTOM NAVBAR ===== */
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 70px;
+  }
+
+  .nav-links,
+  .nav-actions {
+    display: none;
+  }
+
+  .navbar {
+    padding: 15px 5%;
+  }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(11, 12, 16, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid var(--glass-border);
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    z-index: 1000;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    transition: var(--transition);
+  }
+
+  .mobile-nav-item.active,
+  .mobile-nav-item:hover {
+    color: var(--primary);
+  }
+}

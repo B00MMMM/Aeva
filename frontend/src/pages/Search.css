@@ -1,5 +1,5 @@
 .search-page {
-    min-height: 100vh;
+    min-height: calc(100vh - 50px);
     padding-bottom: 50px;
 }
 
@@ -344,4 +344,50 @@
     font-size: 1.5rem;
     color: var(--text-main);
     margin-bottom: 10px;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 600px) {
+    .search-hero {
+        padding: 110px 5% 30px;
+    }
+
+    .search-heading {
+        font-size: 2.2rem;
+    }
+
+    .search-subtext {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .search-form {
+        padding: 5px 12px;
+    }
+
+    .search-input {
+        font-size: 1rem;
+    }
+
+    .search-btn {
+        padding: 8px 15px;
+    }
+
+    .top-match {
+        height: 250px;
+        margin-bottom: 25px;
+    }
+
+    .top-match-title {
+        font-size: 1.8rem;
+    }
+
+    .top-match-price {
+        font-size: 1.1rem;
+    }
+
+    .results-count {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
 }
