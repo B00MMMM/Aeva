@@ -332,6 +332,19 @@ const Info = () => {
                 </div>
             )}
 
+            {/* System Requirements */}
+            {steamInfo?.pc_requirements?.minimum && (
+                <div className="media-section">
+                    <h2 className="section-title">System Requirements</h2>
+                    <div className="sysreq-card glass">
+                        <div dangerouslySetInnerHTML={{ __html: steamInfo.pc_requirements.minimum }} />
+                        {steamInfo.pc_requirements.recommended && (
+                            <div dangerouslySetInnerHTML={{ __html: steamInfo.pc_requirements.recommended }} />
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Screenshots Section */}
             {screenshots.length > 0 && (
                 <div className="media-section">
@@ -354,19 +367,6 @@ const Info = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                </div>
-            )}
-
-            {/* System Requirements */}
-            {steamInfo?.pc_requirements?.minimum && (
-                <div className="media-section">
-                    <h2 className="section-title">System Requirements</h2>
-                    <div className="sysreq-card glass">
-                        <div dangerouslySetInnerHTML={{ __html: steamInfo.pc_requirements.minimum }} />
-                        {steamInfo.pc_requirements.recommended && (
-                            <div dangerouslySetInnerHTML={{ __html: steamInfo.pc_requirements.recommended }} />
-                        )}
                     </div>
                 </div>
             )}
