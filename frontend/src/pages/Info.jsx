@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import DealCard from '../components/DealCard';
 import PriceAlertModal from '../components/PriceAlertModal';
+import { CurrencyContext } from '../context/CurrencyContext';
 import './Info.css';
 import { ArrowLeft, ExternalLink, Play, Expand, ChevronLeft, ChevronRight, Heart, Bell, ThumbsUp, ThumbsDown } from 'lucide-react';
 
@@ -13,6 +14,7 @@ const USER_API = 'http://localhost:5000/api/user';
 const Info = () => {
     const { id } = useParams();
     const { user, getAuthHeader } = useContext(AuthContext);
+    const { formatPrice } = useContext(CurrencyContext);
     const [gameData, setGameData] = useState(null);
     const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -167,7 +169,7 @@ const Info = () => {
                         <Bell size={22} />
                         <div>
                             <strong>Price Drop Alert!</strong>
-                            <p>{info.title} is now ${cheapestDeal?.price} — at or below your target of ${alertData?.targetPrice}!</p>
+                            <p>{info.title} is now {formatPrice(cheapestDeal?.price)} — at or below your target of {formatPrice(alertData?.targetPrice)}!</p>
                         </div>
                         <button className="alert-popup-close" onClick={() => setPriceAlertTriggered(false)}>×</button>
                     </div>
@@ -204,7 +206,7 @@ const Info = () => {
                             </div>
                         )}
                         <div className="info-meta">
-                            <span className="info-price">Starting from ${cheapestDeal?.price}</span>
+                            <span className="info-price">Starting from {formatPrice(cheapestDeal?.price)}</span>
                             {user && (
                                 <div className="info-user-actions">
                                     <button className={`action-btn like-btn ${liked ? 'active' : ''}`} onClick={handleLike} title={liked ? 'Unlike' : 'Like'}>

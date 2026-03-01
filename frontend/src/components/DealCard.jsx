@@ -1,12 +1,16 @@
 import './DealCard.css';
 import { ExternalLink } from 'lucide-react';
+import { useContext } from 'react';
+import { CurrencyContext } from '../context/CurrencyContext';
 
 const DealCard = ({ deal, stores, layout }) => {
+    const { formatPrice } = useContext(CurrencyContext);
     const store = stores?.find(s => s.storeID === deal.storeID);
     const storeIcon = store ? `https://www.cheapshark.com${store.images.icon}` : '';
     const storeName = store ? store.storeName : 'Store';
 
     const savings = Math.round(deal.savings);
+    const hasSavings = savings > 0;
 
     // Row layout: full-width horizontal card
     if (layout === 'row') {
@@ -19,8 +23,10 @@ const DealCard = ({ deal, stores, layout }) => {
 
                 <div className="deal-price-info">
                     <div className="price-tag">
-                        <span className="current-price">${deal.price || deal.salePrice}</span>
-                        {savings > 0 && <span className="retail-price">${deal.retailPrice}</span>}
+                        <span className="price-new">{formatPrice(deal.price || deal.salePrice)}</span>
+                        {hasSavings && (
+                            <span className="price-old">{formatPrice(deal.retailPrice)}</span>
+                        )}
                     </div>
                     {savings > 0 && <span className="deal-savings">-{savings}%</span>}
                 </div>

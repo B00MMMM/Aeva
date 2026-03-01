@@ -78,6 +78,19 @@ router.get('/search', checkCache, async (req, res) => {
         const response = await axios.get(`${CHEAPSHARK_API}/games?title=${encodeURIComponent(term)}&limit=20&exact=0`);
         const games = response.data;
 
+        // Fetch extra Steam metadata (like screenshots) ONLY for the top match to keep search fast
+        if (games.length > 0 && games[0].steamAppID) {
+            try {
+                const steamResponse = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${games[0].steamAppID}`);
+                const steamData = steamResponse.data[games[0].steamAppID];
+                if (steamData && steamData.success && steamData.data.screenshots) {
+                    games[0].steamScreenshots = steamData.data.screenshots;
+                }
+            } catch (steamError) {
+                console.error('Steam API Error during search:', steamError.message);
+            }
+        }
+
         // Enrich with Steam CDN images
         const enrichedGames = games.map((game) => {
             if (game.steamAppID) {
@@ -87,6 +100,8 @@ router.get('/search', checkCache, async (req, res) => {
                     steamImages: {
                         header: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`,
                         capsule: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`,
+                        hero: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_hero.jpg`,
+                        screenshots: game.steamScreenshots || []
                     }
                 };
             }

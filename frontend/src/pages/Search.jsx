@@ -1,12 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Search.css';
 import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { CurrencyContext } from '../context/CurrencyContext';
 
 const API_URL = 'http://localhost:5000/api/games';
 
 const Search = () => {
+    const { formatPrice } = useContext(CurrencyContext);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -85,14 +87,16 @@ const Search = () => {
                         <Link
                             to={`/info/${topResult.gameID}`}
                             className="top-match"
-                            style={{ backgroundImage: `url(${topResult.steamImages?.header || topResult.thumb})` }}
+                            style={{
+                                backgroundImage: `url(${topResult.steamImages?.screenshots?.[1]?.path_full || topResult.steamImages?.header || topResult.thumb})`
+                            }}
                         >
                             <div className="top-match-overlay">
                                 <div className="top-match-info">
                                     <span className="top-match-label">Best Match</span>
                                     <h2 className="top-match-title">{topResult.external}</h2>
                                     <div className="top-match-meta">
-                                        <span className="top-match-price">From ${topResult.cheapest}</span>
+                                        <span className="top-match-price">Starting from {formatPrice(topResult.cheapest)}</span>
                                     </div>
                                     <span className="top-match-cta">
                                         View Details <ChevronRight size={18} />

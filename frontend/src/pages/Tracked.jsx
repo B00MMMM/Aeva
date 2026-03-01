@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { CurrencyContext } from '../context/CurrencyContext';
 import './Tracked.css';
 import { Heart, Bell, Trash2, ExternalLink } from 'lucide-react';
 
@@ -9,6 +10,7 @@ const USER_API = 'http://localhost:5000/api/user';
 
 const Tracked = () => {
     const { user, getAuthHeader } = useContext(AuthContext);
+    const { formatPrice } = useContext(CurrencyContext);
     const [activeTab, setActiveTab] = useState('alerts');
     const [likedGames, setLikedGames] = useState([]);
     const [priceAlerts, setPriceAlerts] = useState([]);
@@ -105,7 +107,7 @@ const Tracked = () => {
                                             <div className="tracked-card-info">
                                                 <Link to={`/info/${alert.gameID}`} className="tracked-card-title">{alert.title}</Link>
                                                 <div className="tracked-card-meta">
-                                                    <span className="tracked-target">Target: <strong>${alert.targetPrice}</strong></span>
+                                                    <span className="tracked-target">Target: <strong>{formatPrice(alert.targetPrice)}</strong></span>
                                                 </div>
                                             </div>
                                             <button className="tracked-remove" onClick={() => handleRemoveAlert(alert.gameID)} title="Remove alert">

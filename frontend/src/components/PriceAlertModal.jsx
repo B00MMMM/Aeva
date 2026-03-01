@@ -1,17 +1,32 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import './PriceAlertModal.css';
 import { Bell, X } from 'lucide-react';
+import { CurrencyContext } from '../context/CurrencyContext';
 
 const PriceAlertModal = ({ isOpen, onClose, currentPrice, existingAlert, onSetAlert, onRemoveAlert }) => {
-    const [targetPrice, setTargetPrice] = useState(existingAlert?.targetPrice || '');
+    const { formatPrice, symbol, convertToLocal, convertToUSD } = useContext(CurrencyContext);
+
+    // Initialize input with local converted price if alert exists
+    const [targetPrice, setTargetPrice] = useState('');
+
+    useEffect(() => {
+        if (existingAlert && isOpen) {
+            setTargetPrice(convertToLocal(existingAlert.targetPrice));
+        } else if (!existingAlert && isOpen) {
+            setTargetPrice('');
+        }
+    }, [existingAlert, isOpen, convertToLocal]);
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const price = parseFloat(targetPrice);
-        if (isNaN(price) || price <= 0) return;
-        onSetAlert(price);
+        const localPrice = parseFloat(targetPrice);
+        if (isNaN(localPrice) || localPrice <= 0) return;
+
+        // Convert back to USD for backend storage
+        const usdPrice = convertToUSD(localPrice);
+        onSetAlert(usdPrice);
         onClose();
     };
 
@@ -37,12 +52,12 @@ const PriceAlertModal = ({ isOpen, onClose, currentPrice, existingAlert, onSetAl
 
                 <div className="modal-current-price">
                     <span className="label">Current Best Price</span>
-                    <span className="value">${currentPrice}</span>
+                    <span className="value">{formatPrice(currentPrice)}</span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="modal-form">
                     <div className="modal-input-group">
-                        <label>Your Target Price ($)</label>
+                        <label>Your Target Price ({symbol})</label>
                         <input
                             type="number"
                             step="0.01"
