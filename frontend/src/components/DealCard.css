@@ -1,0 +1,68 @@
+.deal-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: var(--transition);
+}
+
+.deal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.deal-store-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.store-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+}
+
+.store-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.deal-price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.current-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.retail-price {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.deal-savings {
+    background-color: var(--primary);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.get-deal-btn {
+    width: 100%;
+    margin-top: 10px;
+}
