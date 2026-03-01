@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Info from './pages/Info';
 import Search from './pages/Search';
+import Tracked from './pages/Tracked';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Navbar from './components/Navbar';
@@ -18,6 +19,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/info/:id" element={<Info />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/tracked" element={<Tracked />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Routes>

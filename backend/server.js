@@ -6,6 +6,7 @@ const morgan = require('morgan');
 
 const authRoutes = require('./routes/auth');
 const gamesRoutes = require('./routes/games');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gamesRoutes);
+app.use('/api/user', userRoutes);
 
 // Root Endpoint
 app.get('/', (req, res) => {

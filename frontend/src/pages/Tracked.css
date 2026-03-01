@@ -1,0 +1,160 @@
+.tracked-page {
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+.tracked-hero {
+    padding: 120px 5% 40px;
+    text-align: center;
+}
+
+.tracked-heading {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.tracked-subtext {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+/* Tabs */
+.tracked-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 0 5%;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab-btn:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(255, 106, 0, 0.1);
+}
+
+/* Content */
+.tracked-content {
+    padding: 0 5%;
+}
+
+/* List */
+.tracked-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.tracked-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 15px;
+    transition: var(--transition);
+}
+
+.tracked-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(3px);
+}
+
+.tracked-card-img {
+    flex-shrink: 0;
+}
+
+.tracked-card-img img {
+    width: 160px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.tracked-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tracked-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tracked-card-title:hover {
+    color: var(--primary);
+}
+
+.tracked-card-meta {
+    margin-top: 4px;
+}
+
+.tracked-target {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.tracked-target strong {
+    color: #10b981;
+}
+
+.tracked-remove {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    color: #ef4444;
+    padding: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.tracked-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.1);
+}
+
+/* Empty states */
+.tracked-empty,
+.tracked-empty-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.tracked-empty h2,
+.tracked-empty-tab h3 {
+    color: var(--text-main);
+}

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Search, User as UserIcon, LogOut } from 'lucide-react';
+import { Search, User as UserIcon, LogOut, Heart } from 'lucide-react';
 import logo from '../assets/LOGO.png';
 
 const Navbar = () => {
@@ -33,12 +33,20 @@ const Navbar = () => {
             <div className="nav-links">
                 <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link>
                 <Link to="/search" className={location.pathname === '/search' ? 'active' : ''}>Search</Link>
+                {user && (
+                    <Link to="/tracked" className={location.pathname === '/tracked' ? 'active' : ''}>My Games</Link>
+                )}
             </div>
 
             <div className="nav-actions">
                 <Link to="/search" style={{ display: 'flex', alignItems: 'center' }}>
                     <Search size={20} style={{ cursor: 'pointer' }} color="#a0a0a0" />
                 </Link>
+                {user && (
+                    <Link to="/tracked" style={{ display: 'flex', alignItems: 'center' }}>
+                        <Heart size={20} style={{ cursor: 'pointer' }} color="#a0a0a0" />
+                    </Link>
+                )}
                 {user ? (
                     <>
                         <span style={{ color: '#a0a0a0' }}>Welcome, {user.username}</span>

@@ -1,20 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 import DealCard from '../components/DealCard';
+import PriceAlertModal from '../components/PriceAlertModal';
 import './Info.css';
-import { ArrowLeft, ExternalLink, Play, Expand, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
+import { ArrowLeft, ExternalLink, Play, Expand, ChevronLeft, ChevronRight, Heart, Bell, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/games';
+const USER_API = 'http://localhost:5000/api/user';
 
 const Info = () => {
     const { id } = useParams();
+    const { user, getAuthHeader } = useContext(AuthContext);
     const [gameData, setGameData] = useState(null);
     const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeScreenshot, setActiveScreenshot] = useState(null);
     const videoScrollRef = useRef(null);
+
+    // Like & Alert state
+    const [liked, setLiked] = useState(false);
+    const [alertData, setAlertData] = useState(null); // existing alert if any
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [priceAlertTriggered, setPriceAlertTriggered] = useState(false);
 
     useEffect(() => {
         const fetchGameInfo = async () => {
@@ -35,6 +44,81 @@ const Info = () => {
 
         fetchGameInfo();
     }, [id]);
+
+    // Fetch user like/alert status
+    useEffect(() => {
+        if (!user) return;
+        const fetchUserData = async () => {
+            try {
+                const headers = getAuthHeader();
+                const { data } = await axios.get(`${USER_API}/tracked`, { headers });
+                const isLiked = data.likedGames.some(g => g.gameID === id);
+                setLiked(isLiked);
+                const existing = data.priceAlerts.find(a => a.gameID === id);
+                setAlertData(existing || null);
+            } catch (err) {
+                console.error('Error fetching user data:', err);
+            }
+        };
+        fetchUserData();
+    }, [user, id]);
+
+    // Check if price alert triggered
+    useEffect(() => {
+        if (alertData && gameData?.deals?.[0]) {
+            const currentPrice = parseFloat(gameData.deals[0].price);
+            if (currentPrice <= alertData.targetPrice) {
+                setPriceAlertTriggered(true);
+            }
+        }
+    }, [alertData, gameData]);
+
+    const handleLike = async () => {
+        if (!user) return;
+        try {
+            const { info, steamInfo } = gameData;
+            const headers = getAuthHeader();
+            const { data } = await axios.post(`${USER_API}/like`, {
+                gameID: id,
+                title: info.title,
+                thumb: info.thumb,
+                steamAppID: info.steamAppID
+            }, { headers });
+            setLiked(data.liked);
+        } catch (err) {
+            console.error('Error toggling like:', err);
+        }
+    };
+
+    const handleSetAlert = async (targetPrice) => {
+        if (!user) return;
+        try {
+            const { info } = gameData;
+            const headers = getAuthHeader();
+            await axios.post(`${USER_API}/alert`, {
+                gameID: id,
+                title: info.title,
+                thumb: info.thumb,
+                steamAppID: info.steamAppID,
+                targetPrice
+            }, { headers });
+            setAlertData({ gameID: id, targetPrice });
+        } catch (err) {
+            console.error('Error setting alert:', err);
+        }
+    };
+
+    const handleRemoveAlert = async () => {
+        if (!user) return;
+        try {
+            const headers = getAuthHeader();
+            await axios.delete(`${USER_API}/alert/${id}`, { headers });
+            setAlertData(null);
+            setPriceAlertTriggered(false);
+        } catch (err) {
+            console.error('Error removing alert:', err);
+        }
+    };
 
     const scrollVideos = (direction) => {
         if (videoScrollRef.current) {
@@ -61,7 +145,7 @@ const Info = () => {
     const { info, deals, steamInfo } = gameData;
     const cheapestDeal = deals[0];
 
-    // Build hero image: prefer a full-res screenshot for a cinematic look
+    // Build hero image
     const steamAppID = info.steamAppID;
     const firstScreenshot = steamInfo?.screenshots?.[0]?.path_full;
     const heroImage = firstScreenshot
@@ -72,9 +156,24 @@ const Info = () => {
 
     const screenshots = steamInfo?.screenshots || [];
     const movies = steamInfo?.movies || [];
+    const recommendations = steamInfo?.recommendations;
 
     return (
         <div className="info-page">
+            {/* Price Alert Triggered Popup */}
+            {priceAlertTriggered && (
+                <div className="alert-popup">
+                    <div className="alert-popup-content glass">
+                        <Bell size={22} />
+                        <div>
+                            <strong>Price Drop Alert!</strong>
+                            <p>{info.title} is now ${cheapestDeal?.price} — at or below your target of ${alertData?.targetPrice}!</p>
+                        </div>
+                        <button className="alert-popup-close" onClick={() => setPriceAlertTriggered(false)}>×</button>
+                    </div>
+                </div>
+            )}
+
             {/* Hero Section */}
             <div
                 className="info-hero"
@@ -106,12 +205,32 @@ const Info = () => {
                         )}
                         <div className="info-meta">
                             <span className="info-price">Starting from ${cheapestDeal?.price}</span>
+                            {user && (
+                                <div className="info-user-actions">
+                                    <button className={`action-btn like-btn ${liked ? 'active' : ''}`} onClick={handleLike} title={liked ? 'Unlike' : 'Like'}>
+                                        <Heart size={22} fill={liked ? '#ff6a00' : 'none'} color={liked ? '#ff6a00' : '#fff'} />
+                                    </button>
+                                    <button className={`action-btn alert-btn ${alertData ? 'active' : ''}`} onClick={() => setShowAlertModal(true)} title="Set Price Alert">
+                                        <Bell size={22} fill={alertData ? '#ff6a00' : 'none'} color={alertData ? '#ff6a00' : '#fff'} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Deals Section — full-width vertical rows */}
+            {/* Price Alert Modal */}
+            <PriceAlertModal
+                isOpen={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+                currentPrice={cheapestDeal?.price}
+                existingAlert={alertData}
+                onSetAlert={handleSetAlert}
+                onRemoveAlert={handleRemoveAlert}
+            />
+
+            {/* Deals Section */}
             <div className="deals-container">
                 <h2 className="section-title">Available Deals</h2>
                 <div className="deals-list">
@@ -121,7 +240,38 @@ const Info = () => {
                 </div>
             </div>
 
-            {/* Trailers / Videos Section — horizontal scroll */}
+            {/* Steam Reviews Section */}
+            {recommendations && (
+                <div className="media-section">
+                    <h2 className="section-title">Steam Reviews</h2>
+                    <div className="reviews-card glass">
+                        <div className="reviews-stat">
+                            <ThumbsUp size={28} className="reviews-icon positive" />
+                            <div>
+                                <span className="reviews-number">{recommendations.total.toLocaleString()}</span>
+                                <span className="reviews-label">Total Reviews</span>
+                            </div>
+                        </div>
+                        {steamInfo.review_score_desc && (
+                            <div className="reviews-verdict">
+                                <span className={`verdict-badge ${steamInfo.review_score_desc.toLowerCase().includes('positive') ? 'positive' : 'mixed'}`}>
+                                    {steamInfo.review_score_desc}
+                                </span>
+                            </div>
+                        )}
+                        <a
+                            href={`https://store.steampowered.com/app/${steamAppID}#app_reviews_hash`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="reviews-link"
+                        >
+                            Read Reviews on Steam <ExternalLink size={14} />
+                        </a>
+                    </div>
+                </div>
+            )}
+
+            {/* Trailers / Videos Section */}
             {movies.length > 0 && (
                 <div className="media-section">
                     <h2 className="section-title">Trailers & Videos</h2>
@@ -131,11 +281,6 @@ const Info = () => {
                         </button>
                         <div className="video-scroll-container" ref={videoScrollRef}>
                             {movies.map((movie) => {
-                                // Steam provides embedded video via store widget
-                                const steamEmbedUrl = steamAppID
-                                    ? `https://store.steampowered.com/widget/${steamAppID}`
-                                    : null;
-                                // Direct MP4 (legacy) or fallback to Steam store
                                 const videoSrc = movie.mp4?.max || movie.mp4?.['480'] || movie.webm?.max || null;
 
                                 return (
