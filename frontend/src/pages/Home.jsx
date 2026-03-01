@@ -1,15 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import GameCard from '../components/GameCard';
 import './Home.css';
-import { Play, Info } from 'lucide-react';
+import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_URL = 'http://localhost:5000/api/games';
 
+// Reusable ScrollRow component with side arrows
+const ScrollRow = ({ children }) => {
+    const scrollRef = useRef(null);
+
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const scrollAmount = 600;
+            scrollRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    return (
+        <div className="scroll-row">
+            <button className="scroll-arrow left" onClick={() => scroll('left')}>
+                <ChevronLeft size={28} />
+            </button>
+            <div className="scroll-container" ref={scrollRef}>
+                {children}
+            </div>
+            <button className="scroll-arrow right" onClick={() => scroll('right')}>
+                <ChevronRight size={28} />
+            </button>
+        </div>
+    );
+};
+
 const Home = () => {
     const [trendingDeals, setTrendingDeals] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -26,21 +56,43 @@ const Home = () => {
         fetchGames();
     }, []);
 
+    // Auto-scroll logic for hero section
+    useEffect(() => {
+        if (trendingDeals.length === 0) return;
+        const maxIndex = Math.min(trendingDeals.length, 5);
+        const interval = setInterval(() => {
+            setCurrentHeroIndex((prev) => (prev + 1) % maxIndex);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [trendingDeals.length]);
+
+    const handlePrevHero = () => {
+        const maxIndex = Math.min(trendingDeals.length, 5);
+        setCurrentHeroIndex((prev) => (prev === 0 ? maxIndex - 1 : prev - 1));
+    };
+
+    const handleNextHero = () => {
+        const maxIndex = Math.min(trendingDeals.length, 5);
+        setCurrentHeroIndex((prev) => (prev + 1) % maxIndex);
+    };
+
     if (loading) {
         return <div className="loading-screen">Loading AEVA...</div>;
     }
 
-    const heroGame = trendingDeals[0] || {};
+    const heroGame = trendingDeals[currentHeroIndex] || {};
+    const heroImage = heroGame.steamImages?.hero || heroGame.steamImages?.header || heroGame.thumb || 'https://via.placeholder.com/1920x1080?text=Hero+Image';
 
     return (
         <div className="home-page">
             {/* Hero Section */}
             <section
                 className="hero-section"
-                style={{ backgroundImage: `url(${heroGame.thumb || 'https://via.placeholder.com/1920x1080?text=Hero+Image'})` }}
+                style={{ backgroundImage: `url(${heroImage})` }}
             >
                 <div className="hero-overlay">
-                    <div className="hero-content">
+                    <button className="hero-nav-btn prev" onClick={handlePrevHero}><ChevronLeft size={48} /></button>
+                    <div className="hero-content" key={heroGame.dealID}>
                         <div className="hero-badges">
                             <span className="badge rating">★ {heroGame.dealRating || 'N/A'}</span>
                             {heroGame.savings > 0 && <span className="badge savings">-{Math.round(heroGame.savings)}%</span>}
@@ -67,17 +119,18 @@ const Home = () => {
                             )}
                         </div>
                     </div>
+                    <button className="hero-nav-btn next" onClick={handleNextHero}><ChevronRight size={48} /></button>
                 </div>
             </section>
 
             {/* Top Content Row */}
             <section className="content-section">
                 <h2 className="section-title"><span>TOP 10</span> CONTENT TODAY</h2>
-                <div className="scroll-container">
+                <ScrollRow>
                     {trendingDeals.slice(0, 10).map((game, index) => (
                         <GameCard key={game.dealID} game={game} rank={index + 1} />
                     ))}
-                </div>
+                </ScrollRow>
             </section>
 
             {/* Trending Deals Row */}
@@ -89,11 +142,11 @@ const Home = () => {
                         <span>DLCs</span>
                     </div>
                 </div>
-                <div className="scroll-container">
+                <ScrollRow>
                     {trendingDeals.slice(5, 15).map((game) => (
                         <GameCard key={game.dealID} game={game} />
                     ))}
-                </div>
+                </ScrollRow>
             </section>
         </div>
     );
