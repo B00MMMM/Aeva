@@ -1,42 +1,34 @@
 const express = require('express');
 const axios = require('axios');
-const Cache = require('../models/Cache');
+const redisClient = require('../config/redis');
 
 const router = express.Router();
 const CHEAPSHARK_API = 'https://www.cheapshark.com/api/1.0';
 
-// Middleware to check cache
+// Middleware to check Redis cache
 const checkCache = async (req, res, next) => {
     const key = req.originalUrl;
     try {
-        const cachedData = await Cache.findOne({ key });
-        if (cachedData && cachedData.expiresAt > new Date()) {
-            console.log(`Cache hit for ${key}`);
-            return res.json(cachedData.data);
-        }
+        const cachedData = await redisClient.get(key);
         if (cachedData) {
-            await Cache.deleteOne({ key });
+            console.log(`Redis Cache hit for ${key}`);
+            return res.json(cachedData);
         }
-        console.log(`Cache miss for ${key}`);
+        console.log(`Redis Cache miss for ${key}`);
         next();
     } catch (err) {
-        console.error('Cache middleware error:', err);
+        console.error('Redis cache middleware error:', err);
         next();
     }
 };
 
-// Helper to save to cache
+// Helper to save to Redis cache
 const saveToCache = async (key, data, ttlHours = 2) => {
     try {
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + ttlHours);
-        await Cache.findOneAndUpdate(
-            { key },
-            { key, data, expiresAt },
-            { upsert: true, returnDocument: 'after' }
-        );
+        // Set data with expiration in seconds (ttlHours * 60 * 60)
+        await redisClient.setex(key, ttlHours * 60 * 60, data);
     } catch (err) {
-        console.error('Error saving to cache:', err);
+        console.error('Error saving to Redis cache:', err);
     }
 };
 
