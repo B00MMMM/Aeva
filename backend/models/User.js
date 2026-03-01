@@ -19,7 +19,22 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 6
-    }
+    },
+    likedGames: [{
+        gameID: { type: String, required: true },
+        title: String,
+        thumb: String,
+        steamAppID: String,
+        addedAt: { type: Date, default: Date.now }
+    }],
+    priceAlerts: [{
+        gameID: { type: String, required: true },
+        title: String,
+        thumb: String,
+        steamAppID: String,
+        targetPrice: { type: Number, required: true },
+        addedAt: { type: Date, default: Date.now }
+    }]
 }, { timestamps: true });
 
 // Hash password before saving

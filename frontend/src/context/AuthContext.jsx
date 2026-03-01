@@ -7,11 +7,9 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Use the backend URL (assumes backend runs on port 5000)
     const API_URL = 'http://localhost:5000/api/auth';
 
     useEffect(() => {
-        // Check for token on load
         const token = localStorage.getItem('aeva_token');
         const userData = localStorage.getItem('aeva_user');
         if (token && userData) {
@@ -19,6 +17,11 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
     }, []);
+
+    const getAuthHeader = () => {
+        const token = localStorage.getItem('aeva_token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
 
     const login = async (email, password) => {
         try {
@@ -53,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, getAuthHeader }}>
             {children}
         </AuthContext.Provider>
     );
