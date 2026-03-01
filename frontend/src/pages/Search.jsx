@@ -1,34 +1,86 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Search.css';
 import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { CurrencyContext } from '../context/CurrencyContext';
+import { AuthContext } from '../context/AuthContext';
 
 const API_URL = 'http://localhost:5000/api/games';
 
 const Search = () => {
+    const { user, getAuthHeader } = useContext(AuthContext) || {}; // fallback for safety
     const { formatPrice } = useContext(CurrencyContext);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+
+    // Autocomplete State
+    const [recentSearches, setRecentSearches] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
     const scrollRef = useRef(null);
+    const inputRef = useRef(null);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+    // Fetch user's recent searches on load
+    useEffect(() => {
+        if (!user) return;
+        const fetchSearches = async () => {
+            try {
+                const headers = getAuthHeader();
+                const { data } = await axios.get('http://localhost:5000/api/user/searches', { headers });
+                setRecentSearches(data);
+            } catch (err) {
+                console.error('Error fetching recent searches:', err);
+            }
+        };
+        fetchSearches();
+    }, [user]);
 
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (inputRef.current && !inputRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const executeSearch = async (searchTerm) => {
+        if (!searchTerm.trim()) return;
+
+        setQuery(searchTerm); // Update input field
+        setShowSuggestions(false);
         setLoading(true);
         setSearched(true);
+
         try {
-            const { data } = await axios.get(`${API_URL}/search?term=${encodeURIComponent(query.trim())}`);
+            // Save search to Redis history (fire and forget)
+            if (user) {
+                const headers = getAuthHeader();
+                axios.post('http://localhost:5000/api/user/searches', { term: searchTerm }, { headers }).catch(e => console.error(e));
+
+                // Optimistically update local state if new
+                if (!recentSearches.includes(searchTerm.toLowerCase())) {
+                    setRecentSearches(prev => [searchTerm.toLowerCase(), ...prev].slice(0, 10));
+                }
+            }
+
+            const { data } = await axios.get(`${API_URL}/search?term=${encodeURIComponent(searchTerm.trim())}`);
             setResults(data);
         } catch (error) {
             console.error('Error searching games:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        executeSearch(query);
     };
 
     const scroll = (direction) => {
@@ -40,6 +92,9 @@ const Search = () => {
         }
     };
 
+    // Filter recent searches based on current input
+    const filteredSuggestions = recentSearches.filter(s => s.includes(query.toLowerCase()));
+
     const topResult = results[0];
     const otherResults = results.slice(1);
 
@@ -48,20 +103,42 @@ const Search = () => {
             <div className="search-hero">
                 <h1 className="search-heading">Search Games</h1>
                 <p className="search-subtext">Find the best deals across multiple stores</p>
-                <form className="search-form glass" onSubmit={handleSearch}>
-                    <SearchIcon size={22} className="search-icon" />
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Search for a game..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        autoFocus
-                    />
-                    <button type="submit" className="btn btn-primary search-btn" disabled={loading}>
-                        {loading ? <Loader size={18} className="spin" /> : 'Search'}
-                    </button>
-                </form>
+                <div className="search-container" ref={inputRef}>
+                    <form className="search-form glass" onSubmit={handleSearch}>
+                        <SearchIcon size={22} className="search-icon" />
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Search for a game..."
+                            value={query}
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                                setShowSuggestions(true);
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                        />
+                        <button type="submit" className="btn btn-primary search-btn" disabled={loading}>
+                            {loading ? <Loader size={18} className="spin" /> : 'Search'}
+                        </button>
+                    </form>
+
+                    {/* Autocomplete Dropdown */}
+                    {showSuggestions && user && filteredSuggestions.length > 0 && (
+                        <div className="autocomplete-dropdown glass">
+                            <div className="autocomplete-header">Recent Searches</div>
+                            {filteredSuggestions.map((suggestion, idx) => (
+                                <div
+                                    key={idx}
+                                    className="autocomplete-item"
+                                    onClick={() => executeSearch(suggestion)}
+                                >
+                                    <SearchIcon size={14} className="autocomplete-item-icon" />
+                                    <span>{suggestion}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="search-results-container">
