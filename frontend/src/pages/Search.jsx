@@ -2,7 +2,7 @@ import { useState, useRef, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Search.css';
-import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { Search as SearchIcon, Loader, ChevronLeft, ChevronRight, Info, X } from 'lucide-react';
 import { CurrencyContext } from '../context/CurrencyContext';
 import { AuthContext } from '../context/AuthContext';
 
@@ -48,6 +48,20 @@ const Search = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    const handleRemoveSearch = async (e, termToRemove) => {
+        e.stopPropagation(); // prevent triggering the search click
+        try {
+            const headers = getAuthHeader();
+            await axios.delete('http://localhost:5000/api/user/searches/item', {
+                data: { term: termToRemove },
+                headers
+            });
+            setRecentSearches(prev => prev.filter(t => t !== termToRemove));
+        } catch (err) {
+            console.error('Error removing search term:', err);
+        }
+    };
 
     const executeSearch = async (searchTerm) => {
         if (!searchTerm.trim()) return;
@@ -132,8 +146,17 @@ const Search = () => {
                                     className="autocomplete-item"
                                     onClick={() => executeSearch(suggestion)}
                                 >
-                                    <SearchIcon size={14} className="autocomplete-item-icon" />
-                                    <span>{suggestion}</span>
+                                    <div className="autocomplete-item-left">
+                                        <SearchIcon size={14} className="autocomplete-item-icon" />
+                                        <span>{suggestion}</span>
+                                    </div>
+                                    <button
+                                        className="autocomplete-remove-btn"
+                                        onClick={(e) => handleRemoveSearch(e, suggestion)}
+                                        title="Remove from history"
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </div>
                             ))}
                         </div>

@@ -93,7 +93,7 @@
     padding: 12px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
     cursor: pointer;
     transition: var(--transition);
     color: var(--text-main);
@@ -105,12 +105,42 @@
     color: var(--primary);
 }
 
+.autocomplete-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .autocomplete-item-icon {
     color: var(--text-muted);
 }
 
 .autocomplete-item:hover .autocomplete-item-icon {
     color: var(--primary);
+}
+
+.autocomplete-remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+    opacity: 0.5;
+}
+
+.autocomplete-item:hover .autocomplete-remove-btn {
+    opacity: 1;
+}
+
+.autocomplete-remove-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ef4444;
+    /* red hover for delete */
 }
 
 @keyframes spin {
