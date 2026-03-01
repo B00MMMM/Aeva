@@ -65,6 +65,8 @@
 .hero-content {
     max-width: 600px;
     animation: slideUp 1s ease forwards;
+    margin-right: auto;
+    margin-left: 50px;
 }
 
 @keyframes slideUp {
