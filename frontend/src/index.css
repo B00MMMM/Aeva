@@ -6,8 +6,8 @@
   --text-main: #ffffff;
   --text-muted: #a0a0a0;
   --accent: #c5c6c7;
-  --primary: #f83a3a;
-  --primary-glow: rgba(248, 58, 58, 0.4);
+  --primary: #ff6a00;
+  --primary-glow: rgba(255, 106, 0, 0.4);
   --glass-bg: rgba(31, 40, 51, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
   --radius: 12px;
@@ -66,6 +66,7 @@ a:hover {
   background-color: var(--text-main);
   color: var(--bg-color);
 }
+
 .btn-primary:hover {
   background-color: var(--primary);
   color: #fff;
@@ -79,7 +80,7 @@ a:hover {
 }
 
 .btn-outline:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Layout */
@@ -121,6 +122,7 @@ a:hover {
   align-items: center;
   gap: 10px;
 }
+
 .nav-brand span {
   color: var(--primary);
 }
@@ -147,7 +149,8 @@ a:hover {
   transition: var(--transition);
 }
 
-.nav-links a:hover::after, .nav-links a.active::after {
+.nav-links a:hover::after,
+.nav-links a.active::after {
   width: 100%;
 }
 
@@ -166,6 +169,7 @@ a:hover {
   align-items: center;
   gap: 10px;
 }
+
 .section-title::before {
   content: '';
   display: block;
@@ -181,10 +185,13 @@ a:hover {
   gap: 20px;
   overflow-x: auto;
   padding: 20px 0;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome */
+  display: none;
+  /* Chrome */
 }
 
 /* Forms */

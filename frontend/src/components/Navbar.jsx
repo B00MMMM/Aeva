@@ -25,7 +25,7 @@ const Navbar = () => {
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <Link to="/" className="nav-brand">
-                <Gamepad2 color="#f83a3a" size={32} />
+                <Gamepad2 color="#ff6a00" size={32} />
                 <h1>AEVA</h1>
             </Link>
 

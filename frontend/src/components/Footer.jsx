@@ -8,7 +8,7 @@ const Footer = () => {
             <div className="footer-content">
                 <div className="footer-brand">
                     <div className="footer-logo">
-                        <Gamepad2 color="#f83a3a" size={28} />
+                        <Gamepad2 color="#ff6a00" size={28} />
                         <h3>AEVA</h3>
                     </div>
                     <p className="footer-tagline">Your ultimate game price comparison platform. Find the best deals across multiple stores.</p>
@@ -32,7 +32,7 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom">
-                <p>Made with <Heart size={14} fill="#f83a3a" color="#f83a3a" /> by AEVA Team &copy; {new Date().getFullYear()}</p>
+                <p>Made with <Heart size={14} fill="#ff6a00" color="#ff6a00" /> by AEVA Team &copy; {new Date().getFullYear()}</p>
             </div>
         </footer>
     );
