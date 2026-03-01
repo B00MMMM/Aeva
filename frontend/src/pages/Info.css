@@ -5,7 +5,7 @@
 /* ===== HERO SECTION ===== */
 .info-hero {
     position: relative;
-    min-height: 70vh;
+    min-height: 80vh;
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
@@ -26,7 +26,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 80px 5% 40px;
+    padding: 150px 5% 40px;
 }
 
 .back-link {
@@ -38,8 +38,10 @@
     gap: 8px;
     font-weight: 600;
     font-size: 1.1rem;
-    z-index: 10;
+    z-index: 50;
     color: var(--text-main);
+    padding: 10px;
+    margin-left: -10px;
 }
 
 .back-link:hover {

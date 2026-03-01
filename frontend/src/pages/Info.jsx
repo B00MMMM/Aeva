@@ -183,7 +183,7 @@ const Info = () => {
             >
                 <div className="info-overlay">
                     <Link to="/" className="back-link">
-                        <ArrowLeft size={20} /> Back to Games
+                        <ArrowLeft size={20} /> Back to Home
                     </Link>
                     <div className="info-content">
                         <h1 className="info-title">{info.title}</h1>
