@@ -224,7 +224,7 @@ const Search = () => {
                                                             <div className="game-overlay-content">
                                                                 <h3 className="game-title">{game.external}</h3>
                                                                 <div className="game-meta">
-                                                                    <span className="price">${game.cheapest}</span>
+                                                                    <span className="price">{formatPrice(game.cheapest)}</span>
                                                                 </div>
                                                                 <div className="game-actions">
                                                                     <Link to={`/info/${game.gameID}`} className="btn btn-primary">
