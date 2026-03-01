@@ -161,4 +161,21 @@ router.delete('/searches', auth, async (req, res) => {
     }
 });
 
+// Clear specific search term
+router.delete('/searches/item', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const redisKey = `user_searches:${userId}`;
+        const { term } = req.body;
+
+        if (!term) return res.status(400).json({ message: 'Search term is required' });
+
+        await redisClient.zrem(redisKey, term.trim().toLowerCase());
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error removing specific search term from Redis:', err);
+        res.status(500).json({ message: 'Server error removing search term' });
+    }
+});
+
 module.exports = router;
