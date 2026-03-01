@@ -68,7 +68,7 @@
     animation: spin 1s linear infinite;
 }
 
-/* Results */
+/* Results container */
 .search-results-container {
     padding: 0 5%;
 }
@@ -80,56 +80,206 @@
     margin-bottom: 30px;
 }
 
-/* Unique game result cards */
-.search-results-list {
+/* ===== TOP MATCH — Full-Width Hero Card ===== */
+.top-match {
+    display: flex;
+    align-items: stretch;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    transition: var(--transition);
+    margin-bottom: 40px;
+    min-height: 220px;
+}
+
+.top-match:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+}
+
+.top-match-info {
+    flex: 1;
+    padding: 35px 40px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 12px;
 }
 
-.search-result-card {
+.top-match-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--primary);
+}
+
+.top-match-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.top-match-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.top-match-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.top-match-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 5px;
+    transition: var(--transition);
+}
+
+.top-match:hover .top-match-cta {
+    color: var(--primary);
+}
+
+.top-match-cover {
+    width: 45%;
+    max-width: 500px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.top-match-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.top-match:hover .top-match-cover img {
+    transform: scale(1.05);
+}
+
+/* ===== OTHER RESULTS — Vertical Scroll List ===== */
+.other-results {
+    margin-top: 10px;
+}
+
+.other-results-heading {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.other-results-heading::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 20px;
+    background-color: var(--primary);
+    border-radius: 2px;
+}
+
+.other-results-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Custom scrollbar for the results list */
+.other-results-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.other-results-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+}
+
+.other-results-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+}
+
+.other-results-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.result-row {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 12px;
+    padding: 10px 15px;
     transition: var(--transition);
     text-decoration: none;
+    cursor: pointer;
 }
 
-.search-result-card:hover {
-    transform: translateX(5px);
+.result-row:hover {
     border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translateX(4px);
 }
 
-.search-result-img {
-    width: 184px;
-    height: 69px;
+.result-row-img {
+    width: 150px;
+    height: 56px;
     object-fit: cover;
     border-radius: 6px;
     flex-shrink: 0;
 }
 
-.search-result-info {
+.result-row-info {
     flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    min-width: 0;
 }
 
-.search-result-title {
-    font-size: 1.1rem;
+.result-row-title {
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.search-result-price {
-    font-size: 1.1rem;
+.result-row-price {
+    font-size: 1rem;
     font-weight: 700;
     color: #10b981;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
+.result-row-arrow {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.result-row:hover .result-row-arrow {
+    color: var(--primary);
+}
+
+/* Loading & Empty */
 .search-loading {
     display: flex;
     flex-direction: column;
